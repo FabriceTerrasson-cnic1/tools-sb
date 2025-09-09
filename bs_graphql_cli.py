@@ -18,18 +18,6 @@ DOMAIN_FIELDS = {"domainName", "domainHandle", "nameServer"}
 API_URL_PROD = "https://secure.brandshelter.com/graphql"
 API_URL_DEV = "https://app.dev.bs-srv.net/graphql"
 
-def flatten(d, parent_key="", sep="."):
-    if not isinstance(d, dict):  # protège aussi contre None ou autre type
-        return {}
-    items = []
-    for k, v in d.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
-        if isinstance(v, dict):
-            items.extend(flatten(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
-
 
 def get_token():
     token = os.getenv("BRANDSHELTER_TOKEN")
@@ -87,19 +75,18 @@ def query_graphql(endpoint, query, verbose=False, variables=None):
         return None
 
 
-def paginate_monitorings(dev=False, verbose=False, limit=None, createdAtGt=None, updatedAtGt=None):
+def paginate_monitorings(dev=False, verbose=False, limit=None, createdAtGt=None):
     url = API_URL_DEV if dev else API_URL_PROD
-    # if not createdAtGt:
-    #     createdAtGt = datetime.now().strftime("%Y-%m-%dT00:00:00Z")
+    if not createdAtGt:
+        createdAtGt = datetime.now().strftime("%Y-%m-%dT00:00:00Z")
     query = """
-    query ($first: Int, $after: String, $createdAtGt: ISO8601DateTime, $updatedAtGt: ISO8601DateTime) {
-      monitoringsSafebrands(first: $first, after: $after, createdAtGt: $createdAtGt, updatedAtGt: $updatedAtGt) {
+    query ($first: Int, $after: String, $createdAtGt: ISO8601DateTime) {
+      monitoringsSafebrands(first: $first, after: $after, createdAtGt: $createdAtGt) {
         nodes {
           id
           __typename
           referenceNumber
           createdAt
-          updatedAt
             ... on LogoMonitoring {
                 active
                 domainNameMonitoringFolder
@@ -161,7 +148,7 @@ def paginate_monitorings(dev=False, verbose=False, limit=None, createdAtGt=None,
             batch_size = min(first, remaining)
         else:
             batch_size = first
-        variables = {"first": batch_size, "after": after, "createdAtGt": createdAtGt,"updatedAtGt": updatedAtGt}
+        variables = {"first": batch_size, "after": after, "createdAtGt": createdAtGt}
 
         # Calcul de la complexité de la requête
         query_complexity = batch_size * COMPLEXITY_PER_NODE
@@ -194,18 +181,9 @@ def paginate_monitorings(dev=False, verbose=False, limit=None, createdAtGt=None,
                     items.append((new_key, v))
             return dict(items)
 
-
-
-
         for node in nodes:
-            if node is None:
-                console.print("[yellow]⚠️ Node null dans la réponse GraphQL[/]")
-                continue
-
             flat_node = flatten(node)
-            if not flat_node:
-                continue
-
+            # Affichage sur une seule ligne : clé: valeur séparés par un espace
             console.print(" ".join(f"{k}: {v}" for k, v in flat_node.items()))
 
         total += len(nodes)
@@ -279,11 +257,11 @@ def main():
     parser.add_argument("--monitorings", action="store_true", help="Lister tous les monitorings (avec pagination)")
     parser.add_argument("--limit", type=int, help="Nombre maximum de monitorings à récupérer (avec --monitorings)")
     parser.add_argument("--createdAtGt", type=str, help="Date ISO8601 (ex: 2025-07-02T00:00:00Z) pour filtrer les monitorings créés après cette date (avec --monitorings)")
-    parser.add_argument("--updatedAtGt", type=str, help="Date ISO8601 (ex: 2025-07-02T00:00:00Z) pour filtrer les monitorings mis à jour après cette date (avec --monitorings)")
+
     args = parser.parse_args()
 
     if args.monitorings:
-        paginate_monitorings(dev=args.dev, verbose=args.verbose, limit=args.limit, createdAtGt=args.createdAtGt, updatedAtGt=args.updatedAtGt)
+        paginate_monitorings(dev=args.dev, verbose=args.verbose, limit=args.limit, createdAtGt=args.createdAtGt)
     elif args.field and args.value:
         query_custom(args.field, args.value, dev=args.dev, verbose=args.verbose)
     else:
