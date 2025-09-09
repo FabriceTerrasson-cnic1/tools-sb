@@ -9,7 +9,6 @@
 | whodap | Python | Python 3.9+, httpx/asyncio | No | ✅ | ✅ | Not native | ✅ | ✅ (httpx) | Yes | Good | 2024-09 | Good |
 | OpenRDAP | Go | Go 1.20+, CLI + library | Yes | ✅ | ✅ | Not native | ✅ | ❌ | Yes | Very good | 2025-01 | Wide (7480–84, 9224) |
 | AFNIC RDAP | Web | Hosted service | Yes | ✅ (.fr domains) | ✅ | N/A | ✅ | ❌ | Yes | Good | 2024 | Correct |
-| IANA dns.json | JSON | IANA registry file | Yes | ✅ (bootstrap data) | ❌ | N/A | ✅ | ❌ | Yes | Very good | 2025 | N/A |
 | IANA RDAP JSON values | Spec | IANA specification | Yes | ❌ | ❌ | N/A | ❌ | ❌ | Yes | N/A | 2025 | Standard values |
 | client.rdap.org | Web | Web RDAP universal client | Yes | ✅ (domain, IP, ASN) | ✅ | N/A | ✅ | ❌ | Yes | Good | 2024 | Correct |
 | hiqdev/rdap-whois-proxy | PHP | Bridge service | Yes | ✅ (WHOIS → RDAP) | Partial | N/A | ✅ | ❌ | Yes | Average | 2023 | Correct |
