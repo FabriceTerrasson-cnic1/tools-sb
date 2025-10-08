@@ -12,11 +12,32 @@ import socket
 import struct
 import sys
 import time
-from rich.console import Console
-from rich.panel import Panel
-from rich import print as rprint
 
-console = Console()
+# Codes couleur ANSI pour les messages
+class Colors:
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+    BOLD = '\033[1m'
+    END = '\033[0m'
+
+def print_panel(title, content, border_color="blue"):
+    """Simule rich.Panel avec des caractères ASCII"""
+    color = getattr(Colors, border_color.upper(), Colors.BLUE)
+    print(f"\n{color}╭─── {title} ───╮{Colors.END}")
+    for line in content.split('\n'):
+        print(f"{color}│{Colors.END} {line}")
+    print(f"{color}╰{'─' * (len(title) + 8)}╯{Colors.END}")
+
+def print_box(text):
+    """Simule Panel.fit pour les titres"""
+    print(f"\n{Colors.BOLD}{Colors.CYAN}╭{'─' * (len(text) + 2)}╮{Colors.END}")
+    print(f"{Colors.BOLD}{Colors.CYAN}│ {text} │{Colors.END}")
+    print(f"{Colors.BOLD}{Colors.CYAN}╰{'─' * (len(text) + 2)}╯{Colors.END}")
 
 class EPPClient:
     def __init__(self, server="epp.gtld.knet.cn", port=700, cert_file="certs/epp.gtld.knet.cn.pem"):
@@ -28,13 +49,13 @@ class EPPClient:
         
     def log(self, msg, style="info"):
         if style == "success":
-            rprint(f"[green]✅ {msg}[/green]")
+            print(f"{Colors.GREEN}✅ {msg}{Colors.END}")
         elif style == "error":
-            rprint(f"[red]❌ {msg}[/red]")
+            print(f"{Colors.RED}❌ {msg}{Colors.END}")
         elif style == "warning":
-            rprint(f"[yellow]⚠️ {msg}[/yellow]")
+            print(f"{Colors.YELLOW}⚠️ {msg}{Colors.END}")
         else:
-            rprint(f"[blue]ℹ️ {msg}[/blue]")
+            print(f"{Colors.BLUE}ℹ️ {msg}{Colors.END}")
     
     def connect(self):
         """Établit la connexion EPP avec SSL"""
@@ -161,7 +182,7 @@ class EPPClient:
         else:
             self.log("LOGIN échoué", "error")
             if response:
-                console.print(Panel(response, title="Réponse LOGIN", border_style="red"))
+                print_panel("Réponse LOGIN", response, "red")
             return False
     
     def domain_info(self, domain):
@@ -180,7 +201,7 @@ class EPPClient:
         
         response = self.send_command(dominfo_xml, f"DOMAIN:INFO {domain}")
         if response:
-            console.print(Panel(response, title=f"Info domaine: {domain}", border_style="green"))
+            print_panel(f"Info domaine: {domain}", response, "green")
             return True
         return False
     
@@ -208,7 +229,7 @@ class EPPClient:
 
 def main():
     """Fonction principale"""
-    console.print(Panel.fit("🚀 EPP CLI Final", style="bold blue"))
+    print_box("🚀 EPP CLI Final")
     
     # Vérifie les arguments
     if len(sys.argv) > 1:
@@ -224,8 +245,8 @@ def main():
         mode = "interactive"
     
     if mode == "help":
-        console.print("""
-[bold]Usage:[/bold]
+        print(f"""
+{Colors.BOLD}Usage:{Colors.END}
   ./epp_final.py                    Mode interactif
   ./epp_final.py domain:info <domain>  Requête domaine
   ./epp_final.py auto               Séquence automatique
@@ -237,11 +258,11 @@ def main():
     
     # Test de connexion
     if not client.connect():
-        console.print("[red]❌ Connexion impossible[/red]")
-        console.print("\n[yellow]Diagnostics possibles:[/yellow]")
-        console.print("• IP non whitelistée (doit être 109.234.107.23)")
-        console.print("• Certificat client invalide")
-        console.print("• Serveur indisponible")
+        print(f"{Colors.RED}❌ Connexion impossible{Colors.END}")
+        print(f"\n{Colors.YELLOW}Diagnostics possibles:{Colors.END}")
+        print("• IP non whitelistée (doit être 109.234.107.23)")
+        print("• Certificat client invalide")
+        print("• Serveur indisponible")
         return
     
     try:
@@ -258,9 +279,9 @@ def main():
             
         else:
             # Mode interactif
-            console.print("\n[green]✅ Connecté! Tapez vos commandes:[/green]")
-            console.print("• domain:info <domaine>")
-            console.print("• quit pour quitter")
+            print(f"\n{Colors.GREEN}✅ Connecté! Tapez vos commandes:{Colors.END}")
+            print("• domain:info <domaine>")
+            print("• quit pour quitter")
             
             while True:
                 try:
@@ -272,9 +293,9 @@ def main():
                         if len(parts) > 1:
                             client.domain_info(parts[1])
                         else:
-                            console.print("[red]Usage: domain:info <domaine>[/red]")
+                            print(f"{Colors.RED}Usage: domain:info <domaine>{Colors.END}")
                     else:
-                        console.print("[yellow]Commande non reconnue[/yellow]")
+                        print(f"{Colors.YELLOW}Commande non reconnue{Colors.END}")
                         
                 except KeyboardInterrupt:
                     break
@@ -285,7 +306,7 @@ def main():
     finally:
         client.close()
     
-    console.print("[blue]🎯 Session EPP terminée[/blue]")
+    print(f"{Colors.BLUE}🎯 Session EPP terminée{Colors.END}")
 
 if __name__ == "__main__":
     main()
