@@ -29,27 +29,56 @@ class EPPClient:
     def connect(self):
         """Établit la connexion TLS avec le serveur EPP"""
         try:
+            print(f"🔌 Démarrage connexion vers {self.server}:{self.port}...")
+            
             # Création du socket SSL avec paramètres identiques à OpenSSL qui fonctionne
+            print("🔧 Configuration du contexte SSL...")
             context = ssl.create_default_context()
             context.check_hostname = False
             context.verify_mode = ssl.CERT_NONE
-            # Paramètres identiques à: -cipher 'DEFAULT:@SECLEVEL=0' -legacy_renegotiation
+            
+            # Paramètres identiques à OpenSSL: -cipher 'DEFAULT:@SECLEVEL=0' -legacy_renegotiation
             context.set_ciphers('DEFAULT:@SECLEVEL=0')
             context.options |= ssl.OP_LEGACY_SERVER_CONNECT
             
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(15)  # Timeout de 15 secondes
+            # Force TLS 1.2 comme observé dans OpenSSL
+            context.minimum_version = ssl.TLSVersion.TLSv1_2
+            context.maximum_version = ssl.TLSVersion.TLSv1_2
             
-            print(f"🔌 Connexion à {self.server}:{self.port}...")
+            print("✅ Contexte SSL configuré")
+            
             if self.cert_file:
                 print(f"📜 Chargement certificat client: {self.cert_file}")
-                context.load_cert_chain(self.cert_file, self.cert_file)
-                print("✅ Certificat client chargé avec succès")
-                    
-            self.socket = context.wrap_socket(sock, server_hostname=self.server)
+                try:
+                    context.load_cert_chain(self.cert_file, self.cert_file)
+                    print("✅ Certificat client chargé avec succès")
+                except Exception as cert_err:
+                    print(f"❌ Erreur chargement certificat: {cert_err}")
+                    return False
             
-            print(f"🔌 Connexion à {self.server}:{self.port}...")
-            self.socket.connect((self.server, self.port))
+            # Création socket TCP
+            print("🌐 Création socket TCP...")
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(15)
+            
+            # Connexion TCP d'abord
+            print(f"� Connexion TCP vers {self.server}:{self.port}...")
+            sock.connect((self.server, self.port))
+            print("✅ Connexion TCP établie")
+            
+            # Handshake SSL
+            print("🔐 Démarrage handshake SSL/TLS...")
+            self.socket = context.wrap_socket(sock, server_hostname=self.server)
+            print("✅ Handshake SSL/TLS réussi")
+            
+            # Affichage infos SSL (comme OpenSSL)
+            cipher = self.socket.cipher()
+            if cipher:
+                print(f"🔒 Cipher utilisé: {cipher[0]}")
+                print(f"📋 Protocole: {cipher[1]}")
+                print(f"🔑 Bits: {cipher[2]}")
+            
+            print("📡 Attente du greeting EPP...")
             
             # Lire le greeting EPP
             print("✅ Connexion SSL établie avec succès!")
@@ -116,6 +145,21 @@ class EPPClient:
   <hello/>
 </epp>"""
         return self._send_command(hello_xml)
+
+    def domain_info(self, domain_name):
+        """Envoie une commande domain:info EPP"""
+        domain_info_xml = f"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <info>
+      <domain:info xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>{domain_name}</domain:name>
+      </domain:info>
+    </info>
+    <clTRID>{self._generate_clTRID()}</clTRID>
+  </command>
+</epp>"""
+        return self._send_command(domain_info_xml)
 
     def logout(self):
         """Déconnexion EPP"""
@@ -258,6 +302,7 @@ def main():
     parser.add_argument("--login", help="Login EPP (sinon utilise la constante)")
     parser.add_argument("--password", help="Mot de passe EPP (sinon utilise la constante)")
     parser.add_argument("--clid", help="Client ID EPP (sinon utilise la constante)")
+    parser.add_argument("--domain", help="Domaine pour commande domain:info")
     
     args = parser.parse_args()
     
@@ -273,8 +318,16 @@ def main():
         if not client.login(args.login, args.password, args.clid):
             sys.exit(1)
         
+        # Si un domaine est spécifié, faire domain:info et sortir
+        if args.domain:
+            print(f"\n🔍 Requête domain:info pour: {args.domain}")
+            client.domain_info(args.domain)
+            client.logout()
+            return
+        
         print("\n🎉 Connexion EPP établie ! Commandes disponibles:")
         print("  'hello' - Envoie une commande hello")
+        print("  'domain:info <domaine>' - Informations sur un domaine")
         print("  'logout' - Se déconnecter")
         print("  'xml:<votre_xml>' - Envoie du XML personnalisé")
         print("  'quit' - Quitter sans logout")
@@ -292,13 +345,19 @@ def main():
                     break
                 elif cmd == 'hello':
                     client.hello()
+                elif cmd.startswith('domain:info '):
+                    domain_name = cmd[12:].strip()
+                    if domain_name:
+                        client.domain_info(domain_name)
+                    else:
+                        print("❌ Veuillez spécifier un nom de domaine")
                 elif cmd.startswith('xml:'):
                     custom_xml = cmd[4:].strip()
                     client.send_custom_command(custom_xml)
                 elif cmd == '':
                     continue
                 else:
-                    print("❓ Commande non reconnue. Utilisez 'hello', 'logout', 'xml:<xml>', ou 'quit'")
+                    print("❓ Commande non reconnue. Utilisez 'hello', 'domain:info <domaine>', 'logout', 'xml:<xml>', ou 'quit'")
                     
             except KeyboardInterrupt:
                 print("\n🛑 Interruption clavier")

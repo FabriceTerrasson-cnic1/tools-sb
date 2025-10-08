@@ -1,0 +1,36 @@
+# Commande DOMAIN:INFO pour le domaine IDN xn--j11av3u.xn--hxt814e
+# À copier-coller dans le tunnel OpenSSL après le LOGIN
+
+# ===== VERSION FORMATÉE =====
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <info>
+      <domain:info xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>xn--j11av3u.xn--hxt814e</domain:name>
+      </domain:info>
+    </info>
+    <clTRID>CLI-DOMINFO-IDN-20251008</clTRID>
+  </command>
+</epp>
+
+# ===== VERSION COMPACTE (une ligne) =====
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><epp xmlns="urn:ietf:params:xml:ns:epp-1.0"><command><info><domain:info xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"><domain:name>xn--j11av3u.xn--hxt814e</domain:name></domain:info></info><clTRID>CLI-DOMINFO-IDN-20251008</clTRID></command></epp>
+
+# ===== INFORMATIONS DOMAINE =====
+# Domaine IDN: xn--j11av3u.xn--hxt814e
+# TLD: .xn--hxt814e (équivaut probablement à un TLD chinois en Unicode)
+# Format: Punycode (ASCII Compatible Encoding pour domaines internationalisés)
+
+# ===== SÉQUENCE COMPLÈTE =====
+# 1. LOGIN d'abord (voir login_command.txt)
+# 2. Puis cette commande DOMAIN:INFO
+# 3. Enfin LOGOUT
+
+# ===== RÉPONSE ATTENDUE =====
+# La réponse devrait contenir :
+# - Statut du domaine (clientTransferProhibited, etc.)
+# - Dates de création/expiration
+# - Contacts (registrant, admin, tech, billing)
+# - Nameservers
+# - Informations spécifiques IDN si supportées

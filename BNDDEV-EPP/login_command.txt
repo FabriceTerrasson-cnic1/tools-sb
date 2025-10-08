@@ -1,0 +1,35 @@
+# Commande EPP LOGIN avec vos identifiants
+# À copier-coller dans le tunnel OpenSSL
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <login>
+      <clID>e01290</clID>
+      <pw>4FMPEL66sa</pw>
+      <options>
+        <version>1.0</version>
+        <lang>en</lang>
+      </options>
+      <svcs>
+        <objURI>urn:ietf:params:xml:ns:domain-1.0</objURI>
+        <objURI>urn:ietf:params:xml:ns:contact-1.0</objURI>
+        <objURI>urn:ietf:params:xml:ns:host-1.0</objURI>
+      </svcs>
+    </login>
+    <clTRID>CLI-LOGIN-20251008</clTRID>
+  </command>
+</epp>
+
+# ===== UTILISATION =====
+# 1. Lancez: ./epp_tunnel.sh
+# 2. Attendez de voir le greeting EPP
+# 3. Copiez-collez la commande LOGIN ci-dessus
+# 4. Appuyez sur Entrée
+# 5. Vous devriez recevoir une réponse avec code 1000 (succès)
+
+# ===== COMMANDE COMPACTE (sur une ligne) =====
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><epp xmlns="urn:ietf:params:xml:ns:epp-1.0"><command><login><clID>e01290</clID><pw>4FMPEL66sa</pw><options><version>1.0</version><lang>en</lang></options><svcs><objURI>urn:ietf:params:xml:ns:domain-1.0</objURI><objURI>urn:ietf:params:xml:ns:contact-1.0</objURI><objURI>urn:ietf:params:xml:ns:host-1.0</objURI></svcs></login><clTRID>CLI-LOGIN-20251008</clTRID></command></epp>
+
+# ===== ENSUITE, DOMAIN INFO =====
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><epp xmlns="urn:ietf:params:xml:ns:epp-1.0"><command><info><domain:info xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"><domain:name>xn--j11av3u.xn--hxt814e</domain:name></domain:info></info><clTRID>CLI-DOMINFO-20251008</clTRID></command></epp>

@@ -1,0 +1,77 @@
+# Commandes EPP prêtes à copier-coller
+# Attention: EPP utilise un protocole binaire (4 octets de longueur + XML)
+# Avec OpenSSL en mode texte, vous devez ajouter manuellement la longueur
+
+# ===== COMMANDES EPP STANDARD =====
+
+## 1. LOGIN (remplacer les identifiants si nécessaire)
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <login>
+      <clID>e01290</clID>
+      <pw>4FMPEL66sa</pw>
+      <options>
+        <version>1.0</version>
+        <lang>en</lang>
+      </options>
+      <svcs>
+        <objURI>urn:ietf:params:xml:ns:domain-1.0</objURI>
+        <objURI>urn:ietf:params:xml:ns:contact-1.0</objURI>
+        <objURI>urn:ietf:params:xml:ns:host-1.0</objURI>
+      </svcs>
+    </login>
+    <clTRID>CLI-LOGIN-001</clTRID>
+  </command>
+</epp>
+
+## 2. HELLO
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <hello/>
+</epp>
+
+## 3. DOMAIN INFO (xn--j11av3u.xn--hxt814e)
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <info>
+      <domain:info xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>xn--j11av3u.xn--hxt814e</domain:name>
+      </domain:info>
+    </info>
+    <clTRID>CLI-DOMINFO-001</clTRID>
+  </command>
+</epp>
+
+## 4. DOMAIN CHECK
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <check>
+      <domain:check xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>test.xn--hxt814e</domain:name>
+      </domain:check>
+    </check>
+    <clTRID>CLI-DOMCHECK-001</clTRID>
+  </command>
+</epp>
+
+## 5. LOGOUT
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <logout/>
+    <clTRID>CLI-LOGOUT-001</clTRID>
+  </command>
+</epp>
+
+# ===== INSTRUCTIONS =====
+# 1. Lancez: ./epp_tunnel.sh
+# 2. Attendez le greeting EPP
+# 3. Copiez-collez les commandes ci-dessus (une par une)
+# 4. Appuyez sur Entrée après chaque commande
+# 5. Ctrl+C pour sortir
+
+# Note: Avec OpenSSL en mode texte, le protocole binaire EPP peut poser problème.
+# Si ça ne fonctionne pas, utilisez plutôt le script Python avec tunnel SSH.
